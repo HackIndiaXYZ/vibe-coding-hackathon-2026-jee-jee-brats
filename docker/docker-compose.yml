@@ -1,0 +1,50 @@
+services:
+  postgres:
+    image: postgis/postgis:15-3.3
+    container_name: loadkaro-db
+    environment:
+      POSTGRES_USER: loadkaro
+      POSTGRES_PASSWORD: loadkaro
+      POSTGRES_DB: loadkaro
+      POSTGRES_INITDB_ARGS: "-c max_connections=200 -c shared_buffers=256MB"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U loadkaro"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - loadkaro-net
+
+  api:
+    build: .
+    container_name: loadkaro-api
+    environment:
+      DATABASE_URL: postgresql+asyncpg://loadkaro:loadkaro@postgres:5432/loadkaro
+      ENVIRONMENT: production
+      DEBUG: "false"
+      LOG_LEVEL: info
+      HOST: 0.0.0.0
+      PORT: 8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./:/app
+    networks:
+      - loadkaro-net
+    restart: unless-stopped
+    command: sh -c "python core/setup_db.py && uvicorn app:app --host 0.0.0.0 --port 8000 --reload"
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  loadkaro-net:
+    driver: bridge
