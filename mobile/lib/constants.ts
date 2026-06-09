@@ -141,17 +141,21 @@ export const SHADOW = {
 } as const;
 
 // ─── API Configuration ─────────────────────────────────────────
-export const API_BASE_URL = 'http://10.0.2.2:8000'; // Android emulator localhost
-export const WS_BASE_URL = 'ws://10.0.2.2:8000';
+export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:80'; // Android emulator localhost via Nginx
+export const WS_BASE_URL = process.env.EXPO_PUBLIC_WS_URL || 'ws://10.0.2.2:80';
 export const API_ENDPOINTS = {
   health: '/api/v1/health',
   nearbyDrivers: '/api/v1/drivers/nearby',
   cargoLaneMatch: '/api/v1/cargo-lanes/match',
   b2bBook: '/api/v1/b2b/book',
+  createAuction: '/api/v1/advanced/auction/create',
+  auctionState: (id: string) => `/api/v1/advanced/auction/${id}`,
+  bookHelpers: '/api/v1/helpers/book',
 } as const;
 export const WS_ENDPOINTS = {
   loads: '/ws/loads',
   bids: '/ws/bids',
+  auction: (id: string) => `/api/v1/advanced/ws/auction/${id}`,
 } as const;
 
 // ─── App Config ─────────────────────────────────────────────────

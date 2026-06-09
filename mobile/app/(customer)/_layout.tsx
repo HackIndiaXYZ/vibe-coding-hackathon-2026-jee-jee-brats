@@ -3,6 +3,7 @@
  */
 
 import { Tabs } from 'expo-router';
+import { Text } from 'react-native';
 import { CUSTOMER_COLORS, FONT_WEIGHT } from '../../lib/constants';
 
 export default function CustomerLayout() {
@@ -58,8 +59,8 @@ export default function CustomerLayout() {
 
 function TabBarIcon({ name, color }: { name: string; color: string }) {
   return (
-    <span style={{ fontSize: 24, filter: `grayscale(1) opacity(0.8) drop-shadow(0 0 0 ${color})` }}>
+    <Text style={{ fontSize: 24, opacity: 0.8 }}>
       {name}
-    </span>
+    </Text>
   );
 }

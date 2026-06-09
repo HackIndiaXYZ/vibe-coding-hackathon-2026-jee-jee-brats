@@ -4,15 +4,16 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, Animated } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Animated, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 
 import { useBidStore } from '../../stores/bidStore';
 import { useLoadStore } from '../../stores/loadStore';
 import BidCard from '../../components/BidCard';
 import Button from '../../components/ui/Button';
+import { api } from '../../lib/api';
 import {
   CUSTOMER_COLORS,
   FONT_SIZE,
@@ -25,11 +26,25 @@ import type { Bid } from '../../lib/types';
 
 export default function AuctionScreen() {
   const router = useRouter();
+  const { loadId } = useLocalSearchParams<{ loadId: string }>();
   const { pickup, dropoff, rideMode, estimatedPrice } = useLoadStore();
   const { incomingBids, acceptedBid, setAcceptedBid, addIncomingBid } = useBidStore();
 
   const [timeLeft, setTimeLeft] = useState(AUCTION_DURATION_SECONDS);
   const pulseAnim = React.useRef(new Animated.Value(1)).current;
+
+  // Fetch real auction state
+  useEffect(() => {
+    if (loadId) {
+      api.getAuctionState(loadId)
+        .then((state: any) => {
+          if (state.time_remaining_seconds) {
+            setTimeLeft(state.time_remaining_seconds);
+          }
+        })
+        .catch((e) => console.log('Auction fetch failed (using fallback/mocks):', e));
+    }
+  }, [loadId]);
 
   // Mock incoming bids for hackathon demo
   useEffect(() => {
@@ -148,6 +163,20 @@ export default function AuctionScreen() {
           <Text style={styles.summaryLabel}>Est. Price</Text>
           <Text style={styles.summaryValue}>₹{estimatedPrice}</Text>
         </View>
+        <View style={styles.summaryRow}>
+          <TouchableOpacity
+            style={styles.helperBtn}
+            onPress={() => {
+              if (loadId) {
+                api.bookHelpers(loadId, 1)
+                  .then(() => alert('1 Helper booked successfully for ₹150!'))
+                  .catch(() => alert('Failed to book helper.'));
+              }
+            }}
+          >
+            <Text style={styles.helperBtnText}>+ Helper</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Bids List */}
@@ -249,6 +278,17 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZE.base,
     fontWeight: FONT_WEIGHT.bold,
     color: CUSTOMER_COLORS.text,
+  },
+  helperBtn: {
+    backgroundColor: CUSTOMER_COLORS.primaryLight,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+    borderRadius: RADIUS.md,
+  },
+  helperBtnText: {
+    color: '#FFF',
+    fontSize: FONT_SIZE.xs,
+    fontWeight: FONT_WEIGHT.bold,
   },
   listContainer: {
     flex: 1,

@@ -15,6 +15,7 @@ import { useAuthStore } from '../../stores/authStore';
 import MapPinSelector from '../../components/MapPinSelector';
 import SahiYatriSheet from '../../components/SahiYatriSheet';
 import { CUSTOMER_COLORS, SPACING, RADIUS, SHADOW, FONT_WEIGHT, FONT_SIZE } from '../../lib/constants';
+import { api } from '../../lib/api';
 
 export default function MapScreen() {
   const router = useRouter();
@@ -52,11 +53,35 @@ export default function MapScreen() {
     }
   }, [pickup, dropoff]);
 
-  const handleRequestPickup = () => {
+  const handleRequestPickup = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    // In a real app, we'd make an API call here to create the LoadRequest
-    // For now, move to the auction screen
-    router.push('/(customer)/auction');
+    
+    if (!pickup || !dropoff) return;
+
+    try {
+      const loadId = 'load-' + Date.now();
+      const initialBid = estimatedPrice || 500;
+      const requiredVolume = rideMode === 'solo' ? 100 : 50;
+
+      // Call backend to create the auction
+      await api.createAuction(
+        loadId,
+        initialBid,
+        'mock-zone',
+        pickup.latitude,
+        pickup.longitude,
+        dropoff.latitude,
+        dropoff.longitude,
+        requiredVolume
+      );
+
+      // Navigate with loadId
+      router.push(`/(customer)/auction?loadId=${loadId}`);
+    } catch (err) {
+      console.error('Failed to create auction:', err);
+      // Fallback for demo purposes if backend is unavailable
+      router.push('/(customer)/auction');
+    }
   };
 
   const handleLogout = () => {

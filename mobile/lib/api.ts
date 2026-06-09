@@ -116,6 +116,47 @@ class ApiClient {
     });
   }
 
+  // ─── Advanced Features ─────────────────────────────────────────
+
+  async createAuction(
+    loadId: string,
+    initialBid: number,
+    zoneHash: string,
+    pickupLat: number,
+    pickupLon: number,
+    dropoffLat: number,
+    dropoffLon: number,
+    requiredVolume: number
+  ) {
+    return this.request(API_ENDPOINTS.createAuction, {
+      method: 'POST',
+      body: JSON.stringify({
+        load_id: loadId,
+        initial_bid: initialBid,
+        zone_hash: zoneHash,
+        start_latitude: pickupLat,
+        start_longitude: pickupLon,
+        end_latitude: dropoffLat,
+        end_longitude: dropoffLon,
+        required_volume: requiredVolume,
+      }),
+    });
+  }
+
+  async getAuctionState(loadId: string) {
+    return this.request(API_ENDPOINTS.auctionState(loadId));
+  }
+
+  async bookHelpers(loadId: string, numHelpers: number) {
+    return this.request(API_ENDPOINTS.bookHelpers, {
+      method: 'POST',
+      body: JSON.stringify({
+        load_id: loadId,
+        num_helpers: numHelpers,
+      }),
+    });
+  }
+
   // ─── Auth (Placeholder — implement when backend adds auth) ───
 
   async login(email: string, password: string) {

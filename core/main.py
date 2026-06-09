@@ -29,6 +29,8 @@ from . import crud
 # Advanced features
 from features.routes import router as advanced_router
 from features.routes import init_advanced_features, shutdown_advanced_features
+from features.helpers import router as helpers_router
+from features.webhooks import router as webhooks_router
 
 logger = logging.getLogger(__name__)
 
@@ -65,8 +67,9 @@ app.add_middleware(
 # Include advanced features router
 app.include_router(advanced_router)
 
-
-
+# Include helper and webhook routers
+app.include_router(helpers_router, prefix="/api/v1/helpers", tags=["Helpers"])
+app.include_router(webhooks_router, prefix="/api/v1/webhooks", tags=["Webhooks"])
 @app.get(
     "/api/v1/health",
     tags=["Health"],

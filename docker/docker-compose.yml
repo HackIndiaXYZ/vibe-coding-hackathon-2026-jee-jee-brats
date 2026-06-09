@@ -33,10 +33,13 @@ services:
       - loadkaro-net
 
   api:
-    build: .
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
     container_name: loadkaro-api
     environment:
       DATABASE_URL: postgresql+asyncpg://loadkaro:loadkaro@postgres:5432/loadkaro
+      REDIS_URL: redis://redis:6379
       ENVIRONMENT: production
       DEBUG: "false"
       LOG_LEVEL: info
@@ -47,12 +50,25 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    volumes:
-      - ./:/app
+      redis:
+        condition: service_healthy
     networks:
       - loadkaro-net
     restart: unless-stopped
-    command: sh -c "python core/setup_db.py && uvicorn app:app --host 0.0.0.0 --port 8000 --reload"
+    command: sh -c "python -m core.setup_db && uvicorn app:app --host 0.0.0.0 --port 8000"
+
+  nginx:
+    image: nginx:alpine
+    container_name: loadkaro-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api
+    networks:
+      - loadkaro-net
+    restart: unless-stopped
 
 volumes:
   postgres_data:

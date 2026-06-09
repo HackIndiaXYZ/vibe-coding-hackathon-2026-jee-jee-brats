@@ -126,5 +126,32 @@ class ValidateLoadResponse(BaseModel):
     fits: bool
     estimated_volume: float
     max_allowed: float
-    recommendation: str
     confidence: float
+
+
+# ── Helper Schemas ───────────────────────────────────────────────────────────
+
+class BookHelperRequest(BaseModel):
+    """Request body for booking helpers."""
+    load_id: str = Field(..., description="Unique load identifier")
+    num_helpers: int = Field(..., ge=1, le=2, description="Number of helpers (1 or 2)")
+
+class BookHelperResponse(BaseModel):
+    """Response after booking helpers."""
+    load_id: str
+    num_helpers: int
+    helper_fee: float
+    total_fee_added: float
+    status: str
+    message: str
+
+
+# ── Webhook Schemas ──────────────────────────────────────────────────────────
+
+class WhatsAppWebhookResponse(BaseModel):
+    """Response for WhatsApp webhook processing."""
+    success: bool
+    message: str
+    load_id: Optional[str] = None
+    extracted_pickup: Optional[str] = None
+    extracted_dropoff: Optional[str] = None
