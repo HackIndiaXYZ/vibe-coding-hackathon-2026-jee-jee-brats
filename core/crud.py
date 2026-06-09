@@ -51,7 +51,7 @@ async def get_nearby_drivers(
     )
     
     result = await session.execute(query)
-    return result.scalars().all()
+    return result.unique().scalars().all()
 
 
 async def match_cargo_lane(
@@ -116,7 +116,7 @@ async def check_and_decrement_quota(
         Subscription.b2b_user_id == b2b_user_id
     )
     result = await session.execute(query)
-    subscription = result.scalar_one_or_none()
+    subscription = result.unique().scalar_one_or_none()
     
     if not subscription:
         return False
@@ -192,7 +192,7 @@ async def get_user_by_id(
     """
     query = select(User).where(User.id == user_id)
     result = await session.execute(query)
-    return result.scalar_one_or_none()
+    return result.unique().scalar_one_or_none()
 
 
 async def get_subscription(
@@ -213,4 +213,4 @@ async def get_subscription(
         Subscription.b2b_user_id == b2b_user_id
     )
     result = await session.execute(query)
-    return result.scalar_one_or_none()
+    return result.unique().scalar_one_or_none()
