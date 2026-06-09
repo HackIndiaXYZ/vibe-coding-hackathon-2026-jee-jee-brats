@@ -5,9 +5,10 @@ High-performance Python architecture with geospatial database for hyper-local dr
 from typing import List
 from uuid import UUID
 
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
+import json
 
 from database import get_session
 from schemas import (
@@ -41,6 +42,30 @@ async def health_check():
         "status": "healthy",
         "service": "LoadKaro API",
     }
+
+
+@app.websocket("/ws/loads")
+async def websocket_loads(websocket: WebSocket):
+    """
+    WebSocket endpoint for real-time load broadcasting.
+    Used by driver radar screen.
+    """
+    await websocket.accept()
+    try:
+        while True:
+            data = await websocket.receive_text()
+            # Echo back a response or process bid
+            try:
+                message = json.loads(data)
+                # In a real app, process the bid here
+                await websocket.send_json({
+                    "event": "bid_received",
+                    "payload": {"status": "success", "message": message}
+                })
+            except json.JSONDecodeError:
+                pass
+    except WebSocketDisconnect:
+        pass
 
 
 @app.get(
