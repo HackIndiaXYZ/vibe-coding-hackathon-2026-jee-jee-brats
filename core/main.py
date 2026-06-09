@@ -31,6 +31,7 @@ from features.routes import router as advanced_router
 from features.routes import init_advanced_features, shutdown_advanced_features
 from features.helpers import router as helpers_router
 from features.webhooks import router as webhooks_router
+from features.auth import router as auth_router
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +65,8 @@ app.add_middleware(
     allow_headers=settings.cors_allow_headers,
 )
 
-# Include advanced features router
+# Include auth and advanced features routers
+app.include_router(auth_router, prefix="/api/v1/auth", tags=["Auth"])
 app.include_router(advanced_router)
 
 # Include helper and webhook routers

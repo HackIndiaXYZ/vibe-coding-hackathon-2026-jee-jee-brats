@@ -26,15 +26,9 @@ interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-  user: {
-    id: 'demo-customer-001',
-    name: 'Priya Sharma',
-    email: 'priya@demo.com',
-    role: 'customer',
-    is_active: true,
-  },
-  token: 'demo-token',
-  isAuthenticated: true,
+  user: null,
+  token: null,
+  isAuthenticated: false,
   isLoading: false,
   error: null,
 
