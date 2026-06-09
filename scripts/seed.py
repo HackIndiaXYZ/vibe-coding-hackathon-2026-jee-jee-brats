@@ -22,7 +22,14 @@ async def seed_data():
         result = await session.execute(select(User).where(User.email.in_([
             "customer@loadkaro.in", "driver1@loadkaro.in", "driver2@loadkaro.in", "b2b@loadkaro.in"
         ])))
-        existing_users = result.scalars().all()
+        existing_users = result.unique().scalars().all()
+        user_ids = [u.id for u in existing_users]
+        if user_ids:
+            vehicles_result = await session.execute(select(Vehicle).where(Vehicle.owner_id.in_(user_ids)))
+            existing_vehicles = vehicles_result.scalars().all()
+            for v in existing_vehicles:
+                await session.delete(v)
+            
         for u in existing_users:
             await session.delete(u)
         await session.commit()
@@ -88,7 +95,7 @@ async def seed_data():
         session.add_all([v1, v2])
         await session.commit()
 
-        print("✓ Database seeded successfully!")
+        print("Database seeded successfully!")
         print("  - Customer: customer@loadkaro.in")
         print("  - Driver 1: driver1@loadkaro.in (Tata Ace, Indiranagar)")
         print("  - Driver 2: driver2@loadkaro.in (Bolero, Koramangala)")
