@@ -73,7 +73,7 @@ export const Button: React.FC<ButtonProps> = ({
   const sizeStyles = getSizeStyles(size);
 
   return (
-    <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+    <Animated.View style={[{ transform: [{ scale: scaleAnim }] }, fullWidth && styles.fullWidth, style]}>
       <TouchableOpacity
         onPress={onPress}
         onPressIn={onPressIn}
@@ -88,9 +88,7 @@ export const Button: React.FC<ButtonProps> = ({
           styles.base,
           variantStyles.container,
           sizeStyles.container,
-          fullWidth && styles.fullWidth,
           (disabled || loading) && styles.disabled,
-          style,
         ]}
       >
         {loading ? (
