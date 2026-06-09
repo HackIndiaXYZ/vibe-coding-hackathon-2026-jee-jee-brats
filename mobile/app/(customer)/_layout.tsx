@@ -59,7 +59,7 @@ export default function CustomerLayout() {
 
 function TabBarIcon({ name, color }: { name: string; color: string }) {
   return (
-    <Text style={{ fontSize: 24, opacity: 0.8 }}>
+    <Text style={{ fontSize: 24, color }}>
       {name}
     </Text>
   );
