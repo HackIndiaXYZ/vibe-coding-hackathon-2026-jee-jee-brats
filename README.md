@@ -1,8 +1,3 @@
-Here is the ultimate, combined `README.md`. It seamlessly blends your brilliant hackathon tech implementations (like the zero-cost Gemini geocoding and cross-platform map routing) with the solid business model and feature descriptions we outlined earlier.
-
-This creates a repository document that not only shows *how* the app runs, but *why* it is a winning business idea for the HackIndia VibeCoding Hackathon 2026.
-
-```markdown
 # 🚚 LoadKaro: India's First Hyper-Local Cargo Marketplace
 
 ![Status](https://img.shields.io/badge/Status-HackIndia%20VibeCoding%202026-blue)
@@ -118,7 +113,3 @@ npx expo start
 
 
 *Built for the digital revolution of localized logistics.*
-
-```
-
-```
