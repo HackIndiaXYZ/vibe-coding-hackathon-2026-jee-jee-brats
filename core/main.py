@@ -5,10 +5,10 @@ High-performance Python architecture with geospatial database for hyper-local dr
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Depends, HTTPException, status
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import FastAPI, Depends, HTTPException, status  # type: ignore
+from fastapi.middleware.cors import CORSMiddleware  # type: ignore
+from fastapi.responses import JSONResponse  # type: ignore
+from sqlalchemy.ext.asyncio import AsyncSession  # type: ignore
 
 from .config import settings
 from .database import get_session
@@ -39,7 +39,7 @@ async def lifespan(app: FastAPI):
     """Startup and shutdown lifecycle for the application."""
     # Startup — initialise advanced features (auction/Redis)
     logger.info("Starting LoadKaro API...")
-    await init_advanced_features(redis_url=settings.redis_url)
+    await init_advanced_features(redis_url=settings.redis_url)  # type: ignore
     yield
     # Shutdown — close Redis connections
     logger.info("Shutting down LoadKaro API...")
@@ -138,11 +138,11 @@ async def get_nearby_drivers(
     # Transform to DTOs
     driver_dtos = [
         DriverDTO(
-            id=driver.id,
-            name=driver.name,
-            email=driver.email,
-            role=driver.role,
-            is_active=driver.is_active,
+            id=driver.id,  # type: ignore
+            name=driver.name,  # type: ignore
+            email=driver.email,  # type: ignore
+            role=driver.role,  # type: ignore
+            is_active=driver.is_active,  # type: ignore
         )
         for driver in drivers
     ]
@@ -288,10 +288,10 @@ async def b2b_book(
     )
     
     return B2BBookResponse(
-        load_request_id=load_request.id,
-        status=load_request.status,
-        priority=load_request.priority,
-        required_volume=float(load_request.required_volume),
+        load_request_id=load_request.id,  # type: ignore
+        status=load_request.status,  # type: ignore
+        priority=load_request.priority,  # type: ignore
+        required_volume=float(load_request.required_volume),  # type: ignore
     )
 
 

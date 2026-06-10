@@ -1,7 +1,8 @@
 """
 CRUD operations for LoadKaro with PostGIS geospatial queries.
 """
-from typing import List, Optional
+import logging
+from typing import Optional, Sequence
 from uuid import UUID
 from sqlalchemy import select, and_, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,7 +17,7 @@ async def get_nearby_drivers(
     latitude: float,
     longitude: float,
     radius_km: float = 5.0,
-) -> List[User]:
+) -> Sequence[User]:
     """
     Find active drivers within a specified radius using ST_DWithin PostGIS function.
     
@@ -127,7 +128,7 @@ async def check_and_decrement_quota(
         return False
     
     # Atomically increment used_quota
-    subscription.used_quota += quantity
+    subscription.used_quota = subscription.used_quota + quantity  # type: ignore
     await session.commit()
     return True
 
