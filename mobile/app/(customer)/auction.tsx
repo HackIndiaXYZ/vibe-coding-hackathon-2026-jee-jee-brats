@@ -50,7 +50,8 @@ export default function AuctionScreen() {
   useEffect(() => {
     let timeoutIds: ReturnType<typeof setTimeout>[] = [];
 
-    if (!acceptedBid && incomingBids.length === 0 && estimatedPrice) {
+    if (!acceptedBid && incomingBids.length === 0) {
+      const price = estimatedPrice || 500;
       // Mock driver 1
       timeoutIds.push(
         setTimeout(() => {
@@ -62,7 +63,7 @@ export default function AuctionScreen() {
             driver_name: 'Raj Kumar',
             driver_rating: 4.8,
             vehicle_type: 'Tata Ace',
-            amount: Math.round(estimatedPrice * 0.95),
+            amount: Math.round(price * 0.95),
             created_at: new Date().toISOString(),
           });
         }, 3000)
@@ -79,7 +80,7 @@ export default function AuctionScreen() {
             driver_name: 'Suresh Singh',
             driver_rating: 4.5,
             vehicle_type: 'Mahindra Bolero',
-            amount: Math.round(estimatedPrice * 0.85),
+            amount: Math.round(price * 0.85),
             created_at: new Date().toISOString(),
           });
         }, 7000)
@@ -161,7 +162,7 @@ export default function AuctionScreen() {
         </View>
         <View style={styles.summaryRow}>
           <Text style={styles.summaryLabel}>Est. Price</Text>
-          <Text style={styles.summaryValue}>₹{estimatedPrice}</Text>
+          <Text style={styles.summaryValue}>₹{estimatedPrice || 500}</Text>
         </View>
         <View style={styles.summaryRow}>
           <TouchableOpacity

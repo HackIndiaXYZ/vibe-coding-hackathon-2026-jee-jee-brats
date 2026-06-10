@@ -67,7 +67,8 @@ export const MapPinSelector: React.FC<MapPinSelectorProps> = ({
 
       <MapView
         ref={mapRef}
-        style={styles.map}
+        provider={PROVIDER_GOOGLE}
+        style={StyleSheet.absoluteFillObject}
         initialRegion={DEFAULT_REGION}
         onPress={handleMapPress}
         showsUserLocation
