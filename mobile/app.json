@@ -8,10 +8,7 @@
     "scheme": "mobile",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true,
-      "config": {
-        "googleMapsApiKey": "AIzaSyCL-PHtH29PgOHcIZRcepUjr911fhotT0E"
-      }
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
@@ -21,11 +18,6 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "config": {
-        "googleMaps": {
-          "apiKey": "AIzaSyCL-PHtH29PgOHcIZRcepUjr911fhotT0E"
-        }
-      },
       "package": "com.arsh.chakraborty.mobile"
     },
     "web": {
