@@ -25,7 +25,8 @@
         "googleMaps": {
           "apiKey": "AIzaSyCL-PHtH29PgOHcIZRcepUjr911fhotT0E"
         }
-      }
+      },
+      "package": "com.arsh.chakraborty.mobile"
     },
     "web": {
       "bundler": "metro",
