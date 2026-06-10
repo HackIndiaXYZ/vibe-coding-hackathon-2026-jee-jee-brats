@@ -4,8 +4,6 @@ High-performance Python architecture with geospatial database for hyper-local dr
 """
 import logging
 from contextlib import asynccontextmanager
-from typing import List
-from uuid import UUID
 
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
