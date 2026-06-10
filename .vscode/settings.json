@@ -1,8 +1,10 @@
 {
-  "python.defaultInterpreterPath": "${workspaceFolder}\\backend\\venv\\Scripts\\python.exe",
+  "python.defaultInterpreterPath": "backend/venv/Scripts/python.exe",
   "python.analysis.extraPaths": [
-    "${workspaceFolder}\\backend",
-    "${workspaceFolder}\\core",
-    "${workspaceFolder}\\features"
+    "backend",
+    "core",
+    "features",
+    "scripts",
+    "scratch"
   ]
 }
