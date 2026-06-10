@@ -98,8 +98,8 @@ export default function ARScannerScreen() {
 
   return (
     <View style={styles.container}>
-      <CameraView style={styles.camera} ref={cameraRef}>
-        <SafeAreaView style={styles.overlay} edges={['top', 'bottom']}>
+      <CameraView style={styles.camera} ref={cameraRef} />
+      <SafeAreaView style={styles.overlay} edges={['top', 'bottom']}>
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.headerTitle}>AR Load Scanner</Text>
@@ -169,7 +169,6 @@ export default function ARScannerScreen() {
             </View>
           )}
         </SafeAreaView>
-      </CameraView>
     </View>
   );
 }
@@ -183,7 +182,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   overlay: {
-    flex: 1,
+    ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.3)',
     justifyContent: 'space-between',
   },
