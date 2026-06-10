@@ -114,12 +114,12 @@ export default function BiddingRadarScreen() {
               toValue: 1,
               duration: 3000,
               delay,
-              useNativeDriver: true,
+              useNativeDriver: false,
             }),
             Animated.timing(anim, {
               toValue: 0,
               duration: 0,
-              useNativeDriver: true,
+              useNativeDriver: false,
             }),
           ])
         ).start();
@@ -150,7 +150,7 @@ export default function BiddingRadarScreen() {
     setToastMessage(msg);
     Animated.spring(toastAnim, {
       toValue: 50,
-      useNativeDriver: true,
+      useNativeDriver: false,
       bounciness: 8,
     }).start();
   };
@@ -159,7 +159,7 @@ export default function BiddingRadarScreen() {
     Animated.timing(toastAnim, {
       toValue: -100,
       duration: 300,
-      useNativeDriver: true,
+      useNativeDriver: false,
     }).start(() => setToastMessage(null));
   };
 

@@ -4,6 +4,8 @@
  */
 
 // ─── Customer Palette ───────────────────────────────────────────
+import { Platform } from 'react-native';
+
 export const CUSTOMER_COLORS = {
   primary: '#FF6B2C',
   primaryLight: '#FF8F5E',
@@ -110,39 +112,56 @@ export const RADIUS = {
 
 // ─── Shadows ────────────────────────────────────────────────────
 export const SHADOW = {
-  sm: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  md: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  lg: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.18,
-    shadowRadius: 16,
-    elevation: 8,
-  },
-  glow: (color: string) => ({
-    shadowColor: color,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.5,
-    shadowRadius: 12,
-    elevation: 6,
-  }),
+  sm: Platform.select({
+    web: { boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.08)' as any, elevation: 2 },
+    default: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.08,
+      shadowRadius: 3,
+      elevation: 2,
+    }
+  }) as any,
+  md: Platform.select({
+    web: { boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.12)' as any, elevation: 4 },
+    default: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.12,
+      shadowRadius: 8,
+      elevation: 4,
+    }
+  }) as any,
+  lg: Platform.select({
+    web: { boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.18)' as any, elevation: 8 },
+    default: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.18,
+      shadowRadius: 16,
+      elevation: 8,
+    }
+  }) as any,
+  glow: (color: string) => Platform.select({
+    web: { boxShadow: `0px 0px 12px ${color}` as any, elevation: 6 },
+    default: {
+      shadowColor: color,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.5,
+      shadowRadius: 12,
+      elevation: 6,
+    }
+  }) as any,
 } as const;
 
 // ─── API Configuration ─────────────────────────────────────────
-export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:80'; // Android emulator localhost via Nginx
-export const WS_BASE_URL = process.env.EXPO_PUBLIC_WS_URL || 'ws://10.0.2.2:80';
+
+const isWeb = Platform.OS === 'web';
+const LOCAL_API = isWeb ? 'http://127.0.0.1:8000' : 'http://10.0.2.2:8000';
+const LOCAL_WS = isWeb ? 'ws://127.0.0.1:8000' : 'ws://10.0.2.2:8000';
+
+export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || LOCAL_API;
+export const WS_BASE_URL = process.env.EXPO_PUBLIC_WS_URL || LOCAL_WS;
 export const API_ENDPOINTS = {
   health: '/api/v1/health',
   nearbyDrivers: '/api/v1/drivers/nearby',

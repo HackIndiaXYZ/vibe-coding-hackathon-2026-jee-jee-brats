@@ -33,13 +33,13 @@ export const BidCard: React.FC<BidCardProps> = ({
         toValue: 0,
         duration: 400,
         delay: index * 100,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }),
       Animated.timing(opacityAnim, {
         toValue: 1,
         duration: 400,
         delay: index * 100,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }),
     ]).start();
 

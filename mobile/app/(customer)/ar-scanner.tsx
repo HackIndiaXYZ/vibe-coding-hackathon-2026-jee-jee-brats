@@ -4,12 +4,14 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
-import { Camera, CameraType, CameraView, useCameraPermissions } from 'expo-camera';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Platform } from 'react-native';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
+import { useRouter } from 'expo-router';
 
 import Button from '../../components/ui/Button';
+import { useLoadStore } from '../../stores/loadStore';
 import {
   CUSTOMER_COLORS,
   FONT_SIZE,
@@ -19,6 +21,8 @@ import {
 } from '../../lib/constants';
 
 export default function ARScannerScreen() {
+  const router = useRouter();
+  const { setEstimatedVolume } = useLoadStore();
   const [permission, requestPermission] = useCameraPermissions();
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState<{ volume: number; confidence: number } | null>(null);
@@ -33,12 +37,12 @@ export default function ARScannerScreen() {
           Animated.timing(scanLineAnim, {
             toValue: 1,
             duration: 2000,
-            useNativeDriver: true,
+            useNativeDriver: false,
           }),
           Animated.timing(scanLineAnim, {
             toValue: 0,
             duration: 2000,
-            useNativeDriver: true,
+            useNativeDriver: false,
           }),
         ])
       ).start();
@@ -144,7 +148,8 @@ export default function ARScannerScreen() {
                 <Button
                   title="Use Estimate"
                   onPress={() => {
-                    // Update store and go back to map
+                    setEstimatedVolume(scanResult.volume);
+                    router.push('/(customer)/map');
                   }}
                   variant="primary"
                   style={{ flex: 1, marginLeft: SPACING.sm }}
@@ -196,11 +201,16 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     color: '#FFF',
-    fontSize: FONT_SIZE.xl,
-    fontWeight: FONT_WEIGHT.bold,
-    textShadowColor: 'rgba(0,0,0,0.5)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
+    fontSize: FONT_SIZE.base,
+    color: '#FFF',
+    fontWeight: 'bold',
+    ...(Platform.OS === 'web'
+      ? { textShadow: '0px 1px 4px rgba(0,0,0,0.5)' as any }
+      : {
+          textShadowColor: 'rgba(0,0,0,0.5)',
+          textShadowOffset: { width: 0, height: 1 },
+          textShadowRadius: 4,
+        }),
   },
   headerSubtitle: {
     color: 'rgba(255,255,255,0.8)',
@@ -255,11 +265,16 @@ const styles = StyleSheet.create({
     right: 0,
     height: 2,
     backgroundColor: CUSTOMER_COLORS.primary,
-    shadowColor: CUSTOMER_COLORS.primary,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 10,
-    elevation: 5,
+    borderRadius: RADIUS.full,
+    ...(Platform.OS === 'web' 
+      ? { boxShadow: `0px 0px 20px ${CUSTOMER_COLORS.primary}` as any }
+      : {
+          shadowColor: CUSTOMER_COLORS.primary,
+          shadowOffset: { width: 0, height: 0 },
+          shadowOpacity: 0.8,
+          shadowRadius: 20,
+        }),
+    elevation: 8,
   },
   controls: {
     alignItems: 'center',

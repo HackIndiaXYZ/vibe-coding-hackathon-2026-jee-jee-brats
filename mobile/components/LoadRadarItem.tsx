@@ -38,12 +38,12 @@ export const LoadRadarItem: React.FC<LoadRadarItemProps> = ({
       Animated.timing(slideAnim, {
         toValue: 0,
         duration: 500,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }),
       Animated.timing(opacityAnim, {
         toValue: 1,
         duration: 500,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }),
     ]).start();
 

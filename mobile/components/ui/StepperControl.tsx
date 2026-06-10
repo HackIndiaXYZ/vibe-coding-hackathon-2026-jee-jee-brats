@@ -51,13 +51,13 @@ export const StepperControl: React.FC<StepperControlProps> = ({
       Animated.timing(anim, {
         toValue: 0.85,
         duration: 80,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }),
       Animated.spring(anim, {
         toValue: 1,
         speed: 50,
         bounciness: 8,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }),
     ]).start();
   };

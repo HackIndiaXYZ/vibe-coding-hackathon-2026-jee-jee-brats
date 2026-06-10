@@ -15,6 +15,7 @@ interface LoadState {
   rideMode: RideMode;
   estimatedPrice: number | null;
   poolDiscount: number | null;
+  estimatedVolume: number | null;
 
   // Active loads
   activeLoads: LoadRequest[];
@@ -25,6 +26,7 @@ interface LoadState {
   setDropoff: (point: GeoPoint, address?: string) => void;
   setRideMode: (mode: RideMode) => void;
   setEstimatedPrice: (price: number) => void;
+  setEstimatedVolume: (volume: number) => void;
   setActiveLoads: (loads: LoadRequest[]) => void;
   setCurrentLoad: (load: LoadRequest | null) => void;
   addLoad: (load: LoadRequest) => void;
@@ -40,6 +42,7 @@ export const useLoadStore = create<LoadState>((set, get) => ({
   rideMode: 'solo',
   estimatedPrice: null,
   poolDiscount: null,
+  estimatedVolume: null,
 
   activeLoads: [],
   currentLoad: null,
@@ -64,6 +67,8 @@ export const useLoadStore = create<LoadState>((set, get) => ({
     });
   },
 
+  setEstimatedVolume: (volume) => set({ estimatedVolume: volume }),
+
   setActiveLoads: (loads) => set({ activeLoads: loads }),
 
   setCurrentLoad: (load) => set({ currentLoad: load }),
@@ -87,5 +92,6 @@ export const useLoadStore = create<LoadState>((set, get) => ({
       rideMode: 'solo',
       estimatedPrice: null,
       poolDiscount: null,
+      estimatedVolume: null,
     }),
 }));

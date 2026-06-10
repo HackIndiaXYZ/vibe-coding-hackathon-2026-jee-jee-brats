@@ -3,13 +3,12 @@
  * Map with two draggable pins (pickup = green, dropoff = red)
  */
 
-import React, { useRef, useState } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import MapView, { Marker, Region, PROVIDER_GOOGLE } from 'react-native-maps';
+import React, { useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, Platform } from 'react-native';
+import MapView, { Marker, Region, Polyline, UrlTile } from 'react-native-maps';
 import { CUSTOMER_COLORS, FONT_SIZE, FONT_WEIGHT, SPACING, RADIUS } from '../lib/constants';
 import type { GeoPoint } from '../lib/types';
 
-const { width } = Dimensions.get('window');
 
 // Default to Delhi, India
 const DEFAULT_REGION: Region = {
@@ -24,6 +23,7 @@ interface MapPinSelectorProps {
   dropoff: GeoPoint | null;
   onPickupChange: (point: GeoPoint) => void;
   onDropoffChange: (point: GeoPoint) => void;
+  routeCoords?: GeoPoint[];
   style?: any;
 }
 
@@ -32,10 +32,10 @@ export const MapPinSelector: React.FC<MapPinSelectorProps> = ({
   dropoff,
   onPickupChange,
   onDropoffChange,
+  routeCoords,
   style,
 }) => {
   const mapRef = useRef<MapView>(null);
-  const [activePin, setActivePin] = useState<'pickup' | 'dropoff' | null>(null);
 
   const handleMapPress = (e: any) => {
     const { latitude, longitude } = e.nativeEvent.coordinate;
@@ -43,39 +43,55 @@ export const MapPinSelector: React.FC<MapPinSelectorProps> = ({
 
     if (!pickup) {
       onPickupChange(point);
-      setActivePin('pickup');
-    } else if (!dropoff) {
+    } else {
+      // Always update dropoff on tap (or set it if not yet set)
       onDropoffChange(point);
-      setActivePin('dropoff');
     }
   };
 
+  // Animate to show both markers when they change
+  useEffect(() => {
+    if (pickup && dropoff && mapRef.current) {
+      mapRef.current.fitToCoordinates([pickup, dropoff], {
+        edgePadding: { top: 80, right: 80, bottom: 80, left: 80 },
+        animated: true,
+      });
+    } else if (pickup && mapRef.current) {
+      mapRef.current.animateToRegion({
+        latitude: pickup.latitude,
+        longitude: pickup.longitude,
+        latitudeDelta: 0.02,
+        longitudeDelta: 0.02,
+      }, 800);
+    }
+  }, [pickup, dropoff]);
+
   return (
     <View style={[styles.container, style]}>
-      {/* Instructions overlay */}
-      {(!pickup || !dropoff) && (
-        <View style={styles.instructionOverlay}>
-          <View style={styles.instructionCard}>
-            <Text style={styles.instructionText}>
-              {!pickup
-                ? '📍 Tap to set pickup location'
-                : '🏁 Tap to set drop-off location'}
-            </Text>
-          </View>
-        </View>
-      )}
-
       <MapView
         ref={mapRef}
-        provider={PROVIDER_GOOGLE}
         style={StyleSheet.absoluteFillObject}
         initialRegion={DEFAULT_REGION}
         onPress={handleMapPress}
-        showsUserLocation
-        showsMyLocationButton
+        showsUserLocation={false}
+        showsMyLocationButton={false}
         showsCompass
+        mapType="none"
         accessibilityLabel="Map for selecting pickup and dropoff locations"
       >
+        <UrlTile
+          urlTemplate="https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          maximumZ={19}
+          flipY={false}
+        />
+        {routeCoords && routeCoords.length > 0 && (
+          <Polyline
+            coordinates={routeCoords}
+            strokeColor="#000"
+            strokeWidth={3}
+            lineDashPattern={[1]}
+          />
+        )}
         {pickup && (
           <Marker
             coordinate={pickup}
@@ -142,10 +158,14 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.xl,
     paddingVertical: SPACING.md,
     paddingHorizontal: SPACING.xl,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
+    ...(Platform.OS === 'web' 
+      ? { boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)' as any }
+      : {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.15,
+          shadowRadius: 12,
+        }),
     elevation: 6,
   },
   instructionText: {

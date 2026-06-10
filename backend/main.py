@@ -7,6 +7,7 @@ from uuid import UUID
 
 from fastapi import FastAPI, Depends, HTTPException, status, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession
 import json
 
@@ -19,7 +20,16 @@ from schemas import (
     B2BBookRequest,
     B2BBookResponse,
     ErrorResponse,
+    PlacesSuggestResponse,
+    PlaceSuggestion,
+    PriceEstimateRequest,
+    PriceEstimateResponse,
+    ReverseGeocodeResponse,
 )
+import math
+import urllib.request
+import urllib.parse
+import re
 from models import UserRole
 import crud
 
@@ -28,6 +38,15 @@ app = FastAPI(
     title="LoadKaro API",
     description="Hyper-local freight matching with geospatial database",
     version="1.0.0",
+)
+
+# Add CORS middleware to allow web client
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # For hackathon, allow all
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -278,6 +297,136 @@ async def b2b_book(
         priority=load_request.priority,
         required_volume=float(load_request.required_volume),
     )
+
+
+@app.get(
+    "/api/v1/places/suggest",
+    response_model=PlacesSuggestResponse,
+    tags=["Places"],
+    summary="Get destination suggestions via Gemini",
+)
+async def suggest_places(q: str = "") -> PlacesSuggestResponse:
+    if not q or len(q) < 3:
+        return PlacesSuggestResponse(suggestions=[])
+        
+    api_key = os.getenv("GEMINI_API_KEY", "")
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+    
+    prompt = f"The user searched for a location: '{q}'. Return the best matching real-world places (up to 3) with their latitude and longitude. Respond ONLY with a valid JSON array of objects. Format: [{{\"id\": \"1\", \"title\": \"Name of place\", \"description\": \"Address/Location context\", \"latitude\": 0.0, \"longitude\": 0.0}}]. Do not include markdown codeblocks."
+    
+    data = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {"temperature": 0.1}
+    }
+    
+    req = urllib.request.Request(url, data=json.dumps(data).encode('utf-8'), headers={'Content-Type': 'application/json'})
+    
+    try:
+        import asyncio
+        def fetch():
+            with urllib.request.urlopen(req) as response:
+                return response.read().decode('utf-8')
+        
+        response_text = await asyncio.to_thread(fetch)
+        result = json.loads(response_text)
+        text_response = result['candidates'][0]['content']['parts'][0]['text']
+        
+        # Robust JSON extraction
+        json_match = re.search(r'\[.*\]', text_response, re.DOTALL)
+        if json_match:
+            text_response = json_match.group(0)
+        
+        places_data = json.loads(text_response)
+        
+        places = [
+            PlaceSuggestion(
+                id=str(p.get('id', i)),
+                title=str(p.get('title', 'Unknown')),
+                description=str(p.get('description', '')),
+                latitude=float(p.get('latitude', 0.0)),
+                longitude=float(p.get('longitude', 0.0))
+            ) for i, p in enumerate(places_data)
+        ]
+        return PlacesSuggestResponse(suggestions=places)
+    except Exception as e:
+        print(f"Gemini API suggest error: {e}")
+        return PlacesSuggestResponse(suggestions=[])
+
+@app.get(
+    "/api/v1/places/reverse",
+    response_model=ReverseGeocodeResponse,
+    tags=["Places"],
+    summary="Reverse geocode coordinates via Gemini",
+)
+async def reverse_geocode(lat: float, lon: float) -> ReverseGeocodeResponse:
+    api_key = os.getenv("GEMINI_API_KEY", "")
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+    
+    prompt = f"Reverse geocode this coordinate: latitude {lat}, longitude {lon}. Identify the real-world street, neighborhood, or landmark near it. Respond ONLY with a valid JSON object with two keys: title (a short name like street or landmark) and description (full city/region context). No markdown."
+    
+    data = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {"temperature": 0.1}
+    }
+    
+    req = urllib.request.Request(url, data=json.dumps(data).encode('utf-8'), headers={'Content-Type': 'application/json'})
+    
+    try:
+        import asyncio
+        def fetch():
+            with urllib.request.urlopen(req) as response:
+                return response.read().decode('utf-8')
+        
+        response_text = await asyncio.to_thread(fetch)
+        result = json.loads(response_text)
+        text_response = result['candidates'][0]['content']['parts'][0]['text']
+        
+        # Robust JSON extraction
+        json_match = re.search(r'\{.*\}', text_response, re.DOTALL)
+        if json_match:
+            text_response = json_match.group(0)
+            
+        place_data = json.loads(text_response)
+        
+        return ReverseGeocodeResponse(
+            title=str(place_data.get('title', 'Dropped Pin')),
+            description=str(place_data.get('description', 'Unknown Location'))
+        )
+    except Exception as e:
+        print(f"Gemini API reverse geocode error: {e}")
+        return ReverseGeocodeResponse(title="Dropped Pin", description=f"{lat:.4f}, {lon:.4f}")
+
+
+@app.post(
+    "/api/v1/prices/estimate",
+    response_model=PriceEstimateResponse,
+    tags=["Prices"],
+    summary="Estimate ride price",
+)
+async def estimate_price(request: PriceEstimateRequest) -> PriceEstimateResponse:
+    # Proper Haversine distance calculation
+    R = 6371.0  # Earth's radius in km
+    lat1 = math.radians(request.pickup_latitude)
+    lat2 = math.radians(request.dropoff_latitude)
+    dlat = math.radians(request.dropoff_latitude - request.pickup_latitude)
+    dlon = math.radians(request.dropoff_longitude - request.pickup_longitude)
+    
+    a = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    distance_km = R * c
+    
+    # Realistic Indian ride pricing
+    base_price = 50.0   # Base fare in INR
+    per_km_rate = 12.0   # Per km rate in INR
+    calculated_price = round(base_price + distance_km * per_km_rate)
+    
+    # Minimum fare
+    calculated_price = max(calculated_price, 80)
+    
+    if request.ride_mode == "sahiyatri":
+        calculated_price = round(calculated_price * 0.6)
+
+    return PriceEstimateResponse(estimated_price=float(calculated_price))
 
 
 @app.exception_handler(Exception)

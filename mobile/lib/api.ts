@@ -143,6 +143,57 @@ class ApiClient {
     });
   }
 
+  async getPlacesSuggestions(query: string = "") {
+    const params = new URLSearchParams();
+    if (query) params.append('q', query);
+    return this.request<{suggestions: any[]}>(`/api/v1/places/suggest?${params}`);
+  }
+
+  async getReverseGeocode(lat: number, lon: number) {
+    const params = new URLSearchParams();
+    params.append('lat', lat.toString());
+    params.append('lon', lon.toString());
+    return this.request<{title: string; description: string}>(`/api/v1/places/reverse?${params}`);
+  }
+
+  async getRoute(pickupLat: number, pickupLon: number, dropoffLat: number, dropoffLon: number) {
+    try {
+      const url = `https://router.project-osrm.org/route/v1/driving/${pickupLon},${pickupLat};${dropoffLon},${dropoffLat}?overview=full&geometries=geojson`;
+      const response = await fetch(url);
+      const data = await response.json();
+      if (data.routes && data.routes.length > 0) {
+        // OSRM returns coordinates as [longitude, latitude]
+        const coords = data.routes[0].geometry.coordinates;
+        return coords.map((c: number[]) => ({ latitude: c[1], longitude: c[0] }));
+      }
+      return [];
+    } catch (e) {
+      console.error("OSRM Route Error", e);
+      return [];
+    }
+  }
+
+  async getEstimatedPrice(
+    pickupLat: number,
+    pickupLon: number,
+    dropoffLat: number,
+    dropoffLon: number,
+    rideMode: string = "solo",
+    scheduledTime?: string
+  ) {
+    return this.request<{estimated_price: number}>('/api/v1/prices/estimate', {
+      method: 'POST',
+      body: JSON.stringify({
+        pickup_latitude: pickupLat,
+        pickup_longitude: pickupLon,
+        dropoff_latitude: dropoffLat,
+        dropoff_longitude: dropoffLon,
+        ride_mode: rideMode,
+        scheduled_time: scheduledTime,
+      }),
+    });
+  }
+
   async getAuctionState(loadId: string) {
     return this.request(API_ENDPOINTS.auctionState(loadId));
   }

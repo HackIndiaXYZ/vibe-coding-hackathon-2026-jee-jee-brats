@@ -109,12 +109,12 @@ export default function AuctionScreen() {
           Animated.timing(pulseAnim, {
             toValue: 1.1,
             duration: 1000,
-            useNativeDriver: true,
+            useNativeDriver: false,
           }),
           Animated.timing(pulseAnim, {
             toValue: 1,
             duration: 1000,
-            useNativeDriver: true,
+            useNativeDriver: false,
           }),
         ])
       ).start();

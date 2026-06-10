@@ -16,12 +16,14 @@ export default function CustomerLayout() {
         tabBarStyle: {
           backgroundColor: CUSTOMER_COLORS.surface,
           borderTopColor: CUSTOMER_COLORS.border,
-          paddingBottom: 5,
+          paddingBottom: 20,
           paddingTop: 5,
+          height: 65,
         },
         tabBarLabelStyle: {
           fontWeight: FONT_WEIGHT.medium,
           fontSize: 12,
+          paddingBottom: 5,
         },
       }}
     >

@@ -68,3 +68,32 @@ class B2BBookResponse(BaseModel):
 
 class ErrorResponse(BaseModel):
     detail: str
+
+
+class PlaceSuggestion(BaseModel):
+    id: str
+    title: str
+    description: str
+    latitude: float
+    longitude: float
+
+
+class PlacesSuggestResponse(BaseModel):
+    suggestions: List[PlaceSuggestion]
+
+
+class PriceEstimateRequest(BaseModel):
+    pickup_latitude: float = Field(..., ge=-90.0, le=90.0)
+    pickup_longitude: float = Field(..., ge=-180.0, le=180.0)
+    dropoff_latitude: float = Field(..., ge=-90.0, le=90.0)
+    dropoff_longitude: float = Field(..., ge=-180.0, le=180.0)
+    scheduled_time: Optional[str] = None
+    ride_mode: Optional[str] = "solo"
+
+
+class PriceEstimateResponse(BaseModel):
+    estimated_price: float
+
+class ReverseGeocodeResponse(BaseModel):
+    title: str
+    description: str

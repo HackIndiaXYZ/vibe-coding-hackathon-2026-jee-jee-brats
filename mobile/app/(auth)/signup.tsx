@@ -45,7 +45,7 @@ export default function SignupScreen() {
     setRole(newRole);
     Animated.spring(flipAnim, {
       toValue: newRole === 'driver' ? 1 : 0,
-      useNativeDriver: true,
+      useNativeDriver: false,
       speed: 12,
       bounciness: 8,
     }).start();

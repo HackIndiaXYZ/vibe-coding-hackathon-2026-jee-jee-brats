@@ -32,20 +32,20 @@ export default function SplashScreen() {
       Animated.parallel([
         Animated.spring(logoScale, {
           toValue: 1,
-          useNativeDriver: true,
+          useNativeDriver: false,
           speed: 8,
           bounciness: 12,
         }),
         Animated.timing(logoOpacity, {
           toValue: 1,
           duration: 600,
-          useNativeDriver: true,
+          useNativeDriver: false,
         }),
       ]),
       Animated.timing(taglineOpacity, {
         toValue: 1,
         duration: 400,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }),
     ]).start();
 
@@ -113,12 +113,12 @@ function LoadingDot({ delay }: { delay: number }) {
           toValue: 1,
           duration: 500,
           delay,
-          useNativeDriver: true,
+          useNativeDriver: false,
         }),
         Animated.timing(opacity, {
           toValue: 0.3,
           duration: 500,
-          useNativeDriver: true,
+          useNativeDriver: false,
         }),
       ])
     ).start();
